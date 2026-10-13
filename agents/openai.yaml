@@ -1,7 +1,7 @@
 interface:
-  display_name: "Project Create Rocky 0.1.0"
-  short_description: "中文通用项目创建、规模判断、README 角色入口、PRD 后 GitHub 自动建库"
-  default_prompt: "使用 $project-create-rocky-0-1-0 创建新项目：先进入 PM 需求探讨，判断项目规模并确认流程，确认 PRD 后生成基础文档、README Agent Role Entry、docs/agent-prompts 职位提示词；角色交接默认手动跨窗口，PRD 后 GitHub 自动建库只确认 public/private。"
+  display_name: "Rocky Project Workflow"
+  short_description: "面向开发新手的中文项目规划、分级文档生成与多角色协作工作流"
+  default_prompt: "使用 $rocky-project-workflow 先讨论需求并确认 PRD，再按项目规模生成必要文档并选择合适的执行模式。"
 
 policy:
-  allow_implicit_invocation: true
+  allow_implicit_invocation: false

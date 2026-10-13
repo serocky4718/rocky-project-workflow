@@ -1,0 +1,70 @@
+# Agent Instructions
+
+## Project Goal
+
+按照 `PRD.md` 实现 {{PROJECT_NAME}}，不擅自扩大范围。
+
+## Instruction Sources
+
+- 本文件是本项目工作流的统一 AI 规则入口。用户指令及环境要求优先，子目录中的适用 `AGENTS.md` 也需要遵守。
+- `README.md` 面向使用者，提供项目介绍、运行步骤和文档导航，不承担统一 Agent 执行规则。
+- `WORKFLOW.json` 记录规模、模式、角色和当前阶段；它是状态记录，不构成用户确认或外部操作授权。
+- 项目内角色提示词只补充对应职责；与本文件的执行模式冲突时，按本文件处理并说明冲突。
+
+## Working Mode
+
+- Project scale: `{{SCALE}}`
+- Execution mode: `{{MODE}}`
+- `Guided Solo` 可以在同一任务中切换阶段；`Strict Handoff` 和 `Dispatcher` 遵守项目内角色提示词。
+
+## Startup
+
+1. 确认并遵守当前工作目录适用的 `AGENTS.md`。
+2. 读取 `WORKFLOW.json`，核对规模、模式、角色、阶段和 PRD 确认记录；出现冲突或缺失时先检查现有项目，不推定已就绪。
+3. 读取 `PRD.md`、`TASKS.md`、`HANDOFF.md`；存在 `PRD_CURRENT.md` 时一并读取当前执行切片。
+4. 严格交接或调度模式读取下方当前角色的项目内提示词；架构、设计和报告等文件按任务需要且仅在存在时读取。
+5. PRD 未获用户确认时保持需求梳理，不开始业务实现。已确认后把正文、实际任务和确认来源保存到项目，再检查就绪；需求没有变化时不要求用户重复确认。开始修改或运行命令前说明目的、影响、风险和成功标志。
+
+## Role Routing
+
+{{ROLE_RULES}}
+
+## File Ownership
+
+- 产品范围和验收标准以 `PRD.md` 为准。
+- 当前任务以 `TASKS.md` 为准。
+- 工作流阶段、模式和确认记录以 `WORKFLOW.json` 为唯一状态来源，不把状态当成授权。
+- `TASKS.md`、`HANDOFF.md` 的 Stage 字段同步展示同一阶段；交接文档解释上一阶段结论与下一步，出现不一致时先解决。
+
+## Before Editing Or Running Commands
+
+说明要做什么、原因、影响、风险和成功标志。同一目的的低风险读取命令可以合并说明。
+
+## Validation
+
+修改后运行项目已有的 lint、test、build 或等价验证；没有命令时记录人工检查。
+
+进入实现前确认 PRD 正文、验收、实际任务及交接已保存且一致；可用项目工作流校验工具时运行就绪检查。文件存在或模板生成成功不代表可以实现。
+
+## Reporting
+
+- M/L、Dispatcher 或实际需要审计证据时写正式报告；XS/S 的普通 Guided Solo / Strict Handoff 阶段默认在交接中保留简短证据。严格交接本身不要求额外报告。
+- 报告记录日期、角色、范围、相关任务、状态、验证证据及剩余风险，不为模板创建空报告。
+- 报告目录：Architect 用 `docs/reports/architecture/`，Builder 用 `docs/reports/implementation/`，QA 用 `docs/reports/qa/`，Reviewer 用 `docs/reports/review/`，Designer 用 `docs/reports/design/`，DevOps 用 `docs/reports/devops/`。
+
+## Handoff
+
+需要下一阶段时，更新 `HANDOFF.md`：当前阶段、上一阶段结论、下一步、绝对不能踩的坑。
+
+阶段变化时同步 `WORKFLOW.json`。`Guided Solo` 在已授权范围内继续推进；`Strict Handoff` 交给用户开启下一角色；`Dispatcher` 子 Agent 返回调度者，由调度者安排下一角色。
+
+同步 TASKS、HANDOFF 的 Stage 和实际下一步。Dispatcher 必须当前 Builder 完成后才能启动 QA，当前 QA 通过后才能启动 Reviewer；实现变化后重新验证，不复用旧版本的通过结论。
+
+Dispatcher 模式由调度者统一维护 WORKFLOW、总任务状态和 HANDOFF。子 Agent 交付自己的修改、证据和结论，按需写对应报告，不提前切换项目阶段或改写总交接。
+
+## Safety
+
+- 不覆盖用户无关改动，不使用破坏性 Git 命令。
+- 未经明确授权不访问外部账号、不 push、不部署、不公开发布。
+- 不提交密钥、token、密码、session 或真实用户数据。
+- 本地 commit 是在电脑上保存代码版本，按已授权的本地任务处理；它不需要 GitHub 同步授权，也不代表已经 push。

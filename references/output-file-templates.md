@@ -1,167 +1,90 @@
 # Output File Templates
 
-本文件定义新项目核心输出文件的推荐结构。
+优先使用 `assets/templates/` 和 `scripts/init_project.py` 生成稳定骨架。本文件定义语义，不要求所有项目生成全部文件。
 
-目标：每次生成的 `PRD.md`、`TASKS.md`、`HANDOFF.md` 等文件格式一致。
+## 所有规模
 
-## README.md
+### `README.md`
+
+包含项目简介、快速开始、当前状态和项目文档入口。Strict Handoff 或 Dispatcher 模式再加入 Agent Role Entry。
+
+README 面向使用者，只解释如何打开项目、运行项目和选择角色；角色入口是文档导航。统一开工顺序、角色路由、权限、验证与交接规则放在 `AGENTS.md`，不要在 README 再维护一份执行规则。
+
+### `AGENTS.md`
+
+Codex 自动读取的权威规则，至少包含：
 
 ```md
-# <项目名>
+# Agent Instructions
 
-一句话说明项目做什么。
-
-## Quick Start
-
-## Agent Role Entry
-
-## Project Docs
-
-## Current Status
+## Project Goal
+## Instruction Sources
+## Working Mode
+## Startup
+## Role Routing
+## File Ownership
+## Before Editing Or Running Commands
+## Validation
+## Reporting
+## Handoff
+## Safety
 ```
 
-`Agent Role Entry` 详见 `references/readme-role-entry.md`。
+Startup 规定先读取适用的 Agent 规则、`WORKFLOW.json`、PRD、TASKS、HANDOFF。Role Routing 只列当前模式实际生成的角色提示词；Guided Solo 写明按阶段推进，不引用未生成的角色文件。
 
-## PRD.md
+### `WORKFLOW.json`
 
-```md
-# PRD: <项目名>
+脚本生成的状态文件，记录规模、模式、角色、阶段及 PRD 确认来源。骨架初始化为未确认；PM 只能在用户已确认后记录事实，不能把模板生成当作确认。
 
-## 1. 背景
-## 2. 目标用户
-## 3. 要解决的问题
-## 4. 项目目标
-## 5. MVP 范围
-## 6. 本阶段不做
-## 7. 用户流程
-## 8. 页面 / 模块清单
-## 9. 数据和权限需求
-## 10. 验收标准
-## 11. 风险和待确认问题
+它是阶段的唯一状态来源，TASKS / HANDOFF 的 Stage 同步展示该阶段；优先用 `scripts/update_workflow.py` 一起更新，进入实现前检查就绪。
+
+### `PRD.md`
+
+包含背景、用户、问题、目标、MVP、本阶段不做、流程或模块、数据和权限、验收标准、风险。
+
+### `TASKS.md`
+
+只保存当前版本任务，建议字段：ID、状态、优先级、负责人、任务、验收标准、依赖。
+
+### `HANDOFF.md`
+
+只回答：
+
+```text
+1. 当前项目处于什么阶段？
+2. 上一阶段完成了什么判断？
+3. 下一步具体做什么？
+4. 有哪些绝对不能踩的坑？
 ```
 
-## PRD_CURRENT.md
+## S 及以上
 
-用途：记录当前正在执行的 PRD 版本，不替代完整 PRD。
+### `BACKLOG.md`
 
-```md
-# Current PRD Status
+保存未进入当前版本的候选事项，并说明为什么现在不做以及重新考虑的触发条件。
 
-## Active Version
+## M 及以上
 
-## Current Scope
+- `PRD_CURRENT.md`：当前执行切片、已确认决策、开放问题、验收标准和下一阶段。
+- `PROJECT_STRUCTURE.md`：真实技术栈的目录地图、归属和验证命令；不要默认写入 `package.json`。
+- `ARCHITECTURE.md`：技术栈、模块边界、数据流、风险与取舍。
+- `CHANGELOG.md`：重要产品和实现变化。
+- `docs/prd/`、`docs/reports/`：只创建会使用的子目录。
 
-## Confirmed Decisions
+## 按执行模式或交付需要
 
-## Open Questions
+- `docs/archive/`：旧版本状态快照。
+- `docs/agent-prompts/`：Strict Handoff / Dispatcher 所选角色的项目内自包含提示词；Guided Solo 不因规模较大就生成八份文件。
+- `docs/reports/<role>/`：角色报告；不要预先生成空报告。
+- `docs/design/`、`docs/assets/`、`.github/` 和部署配置：仅在真实需求存在时创建。
 
-## Current Acceptance Criteria
+## `AI_RULES.md` 可选兼容文件
 
-## Next Role
-```
-
-关系：
-
-- `PRD.md` 是完整产品需求。
-- `PRD_CURRENT.md` 是当前执行切片和状态。
-- 需求大改时更新 `PRD.md`。
-- 当前阶段、当前范围、下一角色变化时更新 `PRD_CURRENT.md`。
-
-## TASKS.md
+仅在需要支持不会自动读取 `AGENTS.md` 的其他平台时创建：
 
 ```md
-# Tasks
+# AI Rules Compatibility Note
 
-## Legend
-
-- Status: `todo` / `doing` / `blocked` / `done`
-- Priority: `P0` 必须 / `P1` 重要 / `P2` 可后置
-- Owner: `PM` / `Architect` / `Builder` / `QA` / `Reviewer` / `Designer` / `DevOps`
-
-## Current Sprint
-
-| ID | Status | Priority | Owner | Task | Acceptance | Depends On |
-|---|---|---|---|---|---|---|
-| T-001 | todo | P0 | Builder | <任务> | <验收标准> | - |
-
-## Backlog
-
-## Blocked
-
-## Done
-```
-
-## HANDOFF.md
-
-```md
-# Handoff
-
-## Current Stage
-
-## Completed Work
-
-## Current State
-
-## Verification Result
-
-## Next Role
-
-## Next Steps
-
-## Risks
-
-## Do Not Do
-```
-
-## CHANGELOG.md
-
-```md
-# Changelog
-
-## <YYYY-MM-DD>
-
-- Added:
-- Changed:
-- Fixed:
-- Risk:
-```
-
-## PROJECT_STRUCTURE.md
-
-```md
-# Project Structure
-
-## Root Files
-
-## Source Code
-
-## Docs
-
-## Reports
-
-## Assets
-
-## Private Data
-
-## Ownership
-
-## Validation Commands
-```
-
-`Validation Commands` 记录当前项目实际采用的检查命令，例如 lint、test、build、启动本地服务等。具体选择规则见 `references/validation-rules.md`。
-
-## ARCHITECTURE.md
-
-```md
-# Architecture
-
-## Goals
-
-## Tech Stack
-
-## Module Boundaries
-
-## Data Flow
-
-## Risks and Tradeoffs
+本项目的权威 Agent 规则位于 `AGENTS.md`。
+本文件只记录当前平台差异，不复制完整规则。
 ```

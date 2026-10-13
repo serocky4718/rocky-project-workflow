@@ -1,115 +1,55 @@
 # README Role Entry
 
-本文件定义新项目 `README.md` 里必须包含的角色入口导航。
+README 是使用者的导航页。只在 Strict Handoff 或 Dispatcher 模式加入角色提示词链接；Guided Solo 不需要用户反复新开窗口。
 
-目的：让用户新开窗口时，只要让 AI 读取 `README.md`，AI 就能知道下一步应该读取哪个职位 prompt，而不需要用户复制粘贴完整提示词。
+## README 与 AGENTS 的分工
 
-## 项目内职位提示词目录
+- README：说明如何打开项目、选择角色和查看文档，提供角色提示词链接。
+- AGENTS：维护统一开工顺序、规则来源、角色路由、权限、验证及交接规则。
+- 角色提示词：维护各职务自己的输入、职责、限制和交付物。
 
-新项目创建时，必须生成：
+不要把“Agent 必须先读取哪些文件”或“完成后如何切换角色”写成 README 中的统一执行规则。生成脚本把这些要求写入 AGENTS；README 通过链接引导使用者。
 
-```text
-docs/agent-prompts/
-  pm.md
-  architect.md
-  builder.md
-  reviewer.md
-  qa.md
-  designer.md
-  devops-github.md
+## 生成与补齐
+
+新项目使用 `scripts/init_project.py`，会同时生成 AGENTS 规则入口、README 导航和当前模式需要的角色提示词。
+
+已有项目的补齐脚本仅创建缺失的提示词，不更新已有正文和入口。参数必须与 `WORKFLOW.json` 一致；已知兼容版本无需只为补齐而整体迁移，新文件保留项目版本标记。例如补齐一个 S 规模的严格交接项目：
+
+```powershell
+python "<skill>/scripts/sync_role_prompts.py" "<project>" --project-name "<name>" --scale s --mode strict-handoff
 ```
 
-这些文件来自 skill 内部模板：
+先查看预览清单，确认后加 `--apply` 创建缺失文件。成功标志：缺失提示词已创建，原有文件未被覆盖。模板升级或入口缺失时，先用 `inspect_project.py --diff` 预览，再合并所需差异；不要把补齐脚本当成更新脚本。
 
-```text
-references/roles/pm.md
-references/roles/architect.md
-references/roles/builder.md
-references/roles/reviewer.md
-references/roles/qa.md
-references/roles/designer.md
-references/roles/devops-github.md
-```
+项目提示词从 `references/roles/` 复制并附上项目上下文。项目副本不得要求其他窗口访问技能安装目录；项目专属验证命令维护在 AGENTS 或现有 `PROJECT_STRUCTURE.md` 中，角色按需读取。
 
-## README 必备小节模板
+## README 小节模板
 
-把下面内容写入项目 `README.md`：
+只列实际已生成的角色，不直接粘贴八个角色全表：
 
-~~~md
+```md
 ## Agent Role Entry
 
-本项目使用 `$project-create-rocky-0-1-0` 规则。
+在 Codex 中打开本项目目录，告诉助手要进入的角色。
+以下链接用于查看各角色职责；AI 的开工和交接规则见 [AGENTS.md](AGENTS.md)。
 
-新窗口开始前，先读取：
-
-1. `HANDOFF.md`
-2. `TASKS.md`
-3. `PRD_CURRENT.md`
-4. `PROJECT_STRUCTURE.md`
-5. 当前职位提示词：`docs/agent-prompts/<role>.md`
-
-职位提示词：
-
-- PM：`docs/agent-prompts/pm.md`
-- Architect：`docs/agent-prompts/architect.md`
-- Builder：`docs/agent-prompts/builder.md`
-- Reviewer：`docs/agent-prompts/reviewer.md`
-- QA：`docs/agent-prompts/qa.md`
-- Designer：`docs/agent-prompts/designer.md`
-- DevOps/GitHub：`docs/agent-prompts/devops-github.md`
-
-角色交接是手动跨窗口交接。每个角色完成后，只写清交接信息，不自动切换到下一角色。
-
-### 一键启动命令
-
-Builder：
-
-```text
-使用 $project-create-rocky-0-1-0，进入 Builder 模式。
-请读取 README.md，并按 Agent Role Entry 导航读取 Builder 所需文件。
-只执行 Builder 职责，完成后写清交接，不要切换到 QA。
+- Builder：[角色提示词](docs/agent-prompts/builder.md)
+- QA：[角色提示词](docs/agent-prompts/qa.md)
 ```
 
-QA：
+## 给使用者的启动语
+
+Strict Handoff 的 Builder 示例：
 
 ```text
-使用 $project-create-rocky-0-1-0，进入 QA 模式。
-请读取 README.md，并按 Agent Role Entry 导航读取 QA 所需文件。
-只执行 QA 职责，完成后写清交接，不要切换到 Builder。
+进入本项目的 Builder 角色，完成当前交接中的实现任务。
 ```
 
-Architect：
+Dispatcher 示例（只用于已经选择该模式的项目）：
 
 ```text
-使用 $project-create-rocky-0-1-0，进入 Architect 模式。
-请读取 README.md，并按 Agent Role Entry 导航读取 Architect 所需文件。
-只执行 Architect 职责，完成后写清交接，不要切换到 Builder。
-```
-~~~
-
-## 新窗口示例
-
-Builder 窗口：
-
-```text
-使用 $project-create-rocky-0-1-0，进入 Builder 模式。
-请读取 README.md，并按 Agent Role Entry 导航读取 Builder 所需文件。
-只执行 Builder 职责，完成后写清交接，不要切换到 QA。
+启动本项目的 Dispatcher，按项目规则调度 Builder、QA、Reviewer 完成当前任务。
 ```
 
-QA 窗口：
-
-```text
-使用 $project-create-rocky-0-1-0，进入 QA 模式。
-请读取 README.md，并按 Agent Role Entry 导航读取 QA 所需文件。
-只执行 QA 职责，完成后写清交接，不要切换到 Builder。
-```
-
-## 成功标志
-
-```text
-README.md 包含 Agent Role Entry 小节
-docs/agent-prompts/ 存在
-每个职位都有单独 prompt 文件
-新窗口能从 README 导航到当前职位 prompt
-```
+成功标志：助手遵守项目 AGENTS，根据当前模式读取所选提示词；README 提供使用入口，没有另建一套执行规则。

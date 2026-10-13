@@ -1,90 +1,74 @@
-# Project Create Rocky 0.1.0
+# Rocky Project Workflow
 
-`project-create-rocky-0-1-0` 是一个面向 AI Coding 新手的 Codex skill。
+面向开发新手的 Codex 技能：先把想法整理成明确的需求，再按项目大小生成必要文件，完成开发、验证和交接。
 
-它的目标是帮助用户从“我有一个想法”更快进入合规、清晰、可交接的开发流程：先由 PM 阶段梳理需求和项目规模，再生成 PRD、任务、交接、文件地图和角色提示词，最后让 Builder、QA、Reviewer 等角色可以按规则手动接力。
+当前规则版本为 **0.3.2**。仓库、技能目录和调用名统一使用 `rocky-project-workflow`。
 
-## 适合谁
+## 首次安装
 
-- 第一次使用 AI 辅助写代码的开发新手。
-- 想把项目从想法整理成 PRD、TASKS、HANDOFF 的用户。
-- 想让不同 AI 窗口按 PM、Builder、QA 等职位手动协作的人。
-- 想减少“直接开写代码但没有流程和验收标准”风险的项目。
+在 PowerShell 中运行：
 
-## 核心能力
-
-- PM 需求探讨：通过 1 到 N 轮对话，把模糊想法整理成 PRD。
-- 项目规模判断：按 XS/S/M/L 判断流程轻重，小项目不强制套完整 7 角色。
-- 文件模板：统一 `PRD.md`、`PRD_CURRENT.md`、`TASKS.md`、`HANDOFF.md`、`CHANGELOG.md` 等结构。
-- 文件地图：定义项目目录、文档、报告、资源、私密数据放置规则。
-- 职位提示词：为 PM、Architect、Builder、Reviewer、QA、Designer、DevOps/GitHub 提供独立 prompt。
-- README 角色入口：新窗口只需读取 README，就能导航到当前职位 prompt。
-- 手动跨窗口交接：角色之间不自动连续执行，由用户决定何时进入下一角色。
-- GitHub 自动建库：PRD 确认后，可自动创建公开或私密仓库，只需要用户确认 public/private。
-- 安全和回滚：修改文件、运行命令、Git、GitHub、部署前先说明风险；Builder 大改前建议 checkpoint。
-
-## 推荐启动方式
-
-```text
-使用 $project-create-rocky-0-1-0 帮我创建一个新项目。
-先进入 PM 阶段，和我讨论需求，不要写代码。
-等 PRD 确认后，再生成项目文档和后续流程。
+```powershell
+git clone https://github.com/serocky4718/rocky-project-workflow.git "$env:USERPROFILE\.codex\skills\rocky-project-workflow"
 ```
 
-## 流程概览
+这会下载公开仓库并创建技能目录。已有同名目录时先保留现有修改，不直接覆盖。
+
+成功标志：目录中存在 `SKILL.md`，其中的技能名是 `rocky-project-workflow`。
+
+## 使用方式
+
+在 Codex 中输入：
 
 ```text
-启用 skill
--> PM 需求探讨
--> 项目规模判断
--> PRD 确认
--> 生成 README / PRD / TASKS / HANDOFF / docs/agent-prompts
--> 手动进入 Architect / Builder / QA 等角色
--> PRD 后 GitHub 自动建库
+使用 $rocky-project-workflow 帮我创建一个新项目。
+先讨论需求，PRD 确认后按项目规模生成文件，默认在同一窗口继续开发和验证。
 ```
 
-## 文件地图
+成功标志：助手先讨论需求；确认后把正文和实际任务保存好，再进入下一阶段。文件是否存在与项目是否可以开工会分别检查。
 
-```text
-SKILL.md                         skill 入口和触发式路由表
-CHANGELOG.md                     skill 版本变化记录
-agents/openai.yaml               OpenAI Codex UI 元信息
-references/                      详细规则文档
-references/roles/                各职位独立 prompt 模板
+## 三种执行方式
+
+| 模式 | 适合什么情况 |
+|---|---|
+| Guided Solo（默认） | 同一个窗口连续完成需求、开发和验证 |
+| Strict Handoff | 用户明确要求不同窗口分别承担角色 |
+| Dispatcher | 用户明确要求子 Agent 按开发、测试、评审顺序工作 |
+
+技能已编写八个角色的提示词：PM、Architect、Designer、Dispatcher、Builder、QA、Reviewer、DevOps/GitHub。项目按实际模式和需求使用对应角色，小项目不会默认复制全部文件。
+
+## 生成的项目文件
+
+所有规模都有 README、AGENTS、PRD、TASKS、HANDOFF 和 WORKFLOW 状态文件。较大的项目按需增加当前需求切片、架构、文件地图、报告和归档。
+
+| 文件 | 作用 |
+|---|---|
+| README.md | 给使用者看的项目说明、运行步骤和文档导航 |
+| AGENTS.md | AI 的统一开工、角色、验证、报告和交接规则 |
+| PRD.md | 已确认的需求及验收标准 |
+| TASKS.md | 当前任务 |
+| WORKFLOW.json | 当前阶段及确认记录 |
+| HANDOFF.md | 展示同一阶段，说明上一阶段结论和下一步 |
+
+GitHub 同步是单独的可选操作，需要用户授权并确定仓库可见性；本地保存代码版本与上传远程分开处理。
+
+## 本仓库的文件
+
+- [SKILL.md](SKILL.md)：技能入口和路由。
+- [references/](references/)：需求、规模、模式及交接规则。
+- [references/roles/](references/roles/)：八个职务提示词。
+- [assets/templates/](assets/templates/)：项目文档模板。
+- [scripts/](scripts/)：生成、补齐、进度同步、检查及回归测试工具。
+- [版本策略](references/versioning-strategy.md)：当前版本与兼容说明。
+
+README 是仓库的使用说明；技能执行规则由 SKILL 和对应参考文件提供，生成项目的统一规则放在项目 AGENTS 中。
+
+## 修改技能后的本地检查
+
+在仓库目录运行：
+
+```powershell
+python -X utf8 -B scripts/test_workflow.py --work-dir work/checks
 ```
 
-关键规则：
-
-- `references/pm-discovery-flow.md`: PM 如何探讨需求并确认 PRD。
-- `references/project-scale-rules.md`: 项目规模判断。
-- `references/output-file-templates.md`: 输出文件结构模板。
-- `references/readme-role-entry.md`: README 角色入口模板。
-- `references/role-delivery-rules.md`: 每个职位的交付边界。
-- `references/validation-rules.md`: 多技术栈验证命令。
-- `references/rollback-rules.md`: Builder 大改和 QA 失败后的回滚策略。
-- `references/github-automation-rules.md`: GitHub 建库规则。
-- `references/failure-recovery-rules.md`: 常见失败处理。
-
-## 角色交接说明
-
-本 skill 不会让 PM、Builder、QA 在同一个窗口里自动连续执行。
-
-推荐方式是用户按需要新开窗口，并说：
-
-```text
-使用 $project-create-rocky-0-1-0，进入 Builder 模式。
-请读取 README.md，并按 Agent Role Entry 导航读取 Builder 所需文件。
-只执行 Builder 职责，完成后写清交接，不要切换到 QA。
-```
-
-## 项目状态
-
-当前版本是 `0.1.0`，主要用于建立稳定的项目创建流程、角色边界和文档规范。
-
-计划中的 `0.2.0` 会考虑加入脚本化初始化、更多技术栈模板和更多平台适配。
-
-## 注意事项
-
-- 公开仓库不要提交真实 API Key、token、密码、session 或用户数据。
-- 高风险 Git 命令，例如 `git reset --hard` 和 `git clean -fd`，必须由用户明确要求后才能执行。
-- GitHub 建库只自动化仓库创建、remote、commit、push；其它角色流程默认手动。
+该命令只在 `work/checks` 下生成隔离示例，不访问外部账号。成功标志：四项关键行为检查显示 `OK`，包括需求确认、交接状态、调度顺序和兼容版本保留用户内容。

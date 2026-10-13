@@ -17,21 +17,24 @@
 - 不擅自删除用户文件。
 - 不擅自部署或 push。
 - 不擅自更换技术栈或引入大型依赖。
-- 完成后不切换到 QA，只写清交接。
+- Strict Handoff 完成后更新交接，由用户开启 QA；Dispatcher 子 Agent 返回调度者，不自行承担 QA。Guided Solo 可在标注阶段后继续 QA，不因角色切换额外请求确认。
 - 大改前建议创建 checkpoint commit 或至少记录 diff 摘要。
 
 ## 输入文件
 
-优先读取：
+先按 AGENTS 的开工规则读取；其他设计文件和报告仅在存在时读取：
 
 ```text
-README.md
+AGENTS.md
+WORKFLOW.json
+PRD.md
 HANDOFF.md
 TASKS.md
-PRD_CURRENT.md
-ARCHITECTURE.md
-PROJECT_STRUCTURE.md
-docs/reports/architecture/
+PRD_CURRENT.md（如存在）
+ARCHITECTURE.md（如存在）
+PROJECT_STRUCTURE.md（如存在）
+docs/reports/architecture/（如存在）
+README.md（按需了解项目）
 ```
 
 ## 工作流程
@@ -39,7 +42,8 @@ docs/reports/architecture/
 1. 说明要改哪些文件、为什么改、风险是什么。
 2. 实现最小可验证版本。
 3. 运行合适的 lint/test/build 或项目验证命令。
-4. 写实现报告和 `HANDOFF.md`。
+4. 按 AGENTS 的 Handoff 同步实际阶段、TASKS 和交接；按 Reporting 决定是否写实现报告。
+5. 未来想法不写入 `TASKS.md` 或 `HANDOFF.md`，只建议 PM 放入 `BACKLOG.md`。
 
 ## 输出规范
 
@@ -53,10 +57,13 @@ checkpoint 或 diff 摘要
 未完成事项
 风险
 交给 QA 的验证建议
+绝对不能踩的坑
 ```
 
 ## 完成标志
 
 - 功能已实现。
 - 验证命令已运行或说明无法运行原因。
-- QA 可以在新窗口或用户指定后接手测试。
+- 需要实现报告时已写入 `docs/reports/implementation/`；XS/S 不制造空报告。
+- `HANDOFF.md` 已更新为交给 QA 的最短交接。
+- QA 按当前模式继续：同窗口进入 QA 阶段、交给用户的新窗口，或由 Dispatcher 调度。

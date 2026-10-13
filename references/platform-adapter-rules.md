@@ -14,6 +14,7 @@
 agents/openai.yaml    OpenAI Codex UI metadata
 SKILL.md              通用入口和路由表
 references/           平台无关规则文档
+项目 AGENTS.md         Codex 自动读取的项目级权威规则
 ```
 
 ## 未来扩展

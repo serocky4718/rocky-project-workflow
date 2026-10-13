@@ -1,107 +1,56 @@
 # GitHub Automation Rules
 
-本规则用于让 AI 在 PM 确定 PRD 后，自动化创建 GitHub 仓库、登记远程地址并推送项目。
+GitHub 是可选的外部写操作，不是 PRD 确认后的默认步骤。
 
-目标是减少新手需要手动判断的步骤。仓库名、remote、初始化 commit、push 等由 AI 根据项目上下文自动处理；用户只需要确认仓库公开状态。
+## 授权顺序
 
-## 执行时机
-
-GitHub 自动化发生在：
+先问：
 
 ```text
-PM 与用户完成需求讨论
--> PM 写好 PRD / PRD_CURRENT / TASKS / HANDOFF
--> PM 确认 PRD 已定稿或进入当前版本基线
--> AI 询问仓库 public 还是 private
--> AI 自动创建 GitHub 仓库并登记
+是否要把这个项目同步到 GitHub？
 ```
 
-## 唯一需要确认的问题
-
-创建仓库前只问用户：
+只有用户明确同意后，再问：
 
 ```text
-这个 GitHub 仓库要公开 public，还是私密 private？
+仓库要使用 public 还是 private？
 ```
 
-不再询问：
+没有得到第一项授权时，不访问 GitHub 账号、不创建仓库、不配置 GitHub remote、不 push。部署授权与 GitHub 授权分开处理。
 
-- 仓库名称。
-- 仓库描述。
-- 是否创建 README。
-- 是否创建 `.gitignore`。
-- 是否创建 license。
-- 是否设置 remote。
-- 是否首次 commit。
-- 是否首次 push。
+本地 commit 只在电脑上保存代码版本，按 `safety-rules.md` 的本地操作规则处理。它不依赖 GitHub 同步授权，不代表代码已上传；PM 自身仍不执行 Git 写入。
 
-这些由 AI 按 PRD、项目目录和当前工程状态自动决定。
+## 工具顺序
 
-## 自动命名规则
+1. 优先使用已安装且已授权的 GitHub 连接器。
+2. 没有连接器时，先用只读方式检查 `gh auth status`，再决定是否使用 GitHub CLI。
+3. 两者都不可用时，给出手动步骤并记录阻塞，不假装完成。
 
-仓库名按顺序取值：
+## 可自动推导的内容
 
-1. `PRD.md` 或 `PRD_CURRENT.md` 里的项目名。
-2. `README.md` 里的项目名。
-3. 当前本地项目文件夹名。
+用户授权后，可从 PRD、README 和项目目录推导：
 
-命名转换规则：
+- 仓库名和描述。
+- `.gitignore` 类型。
+- remote 名称。
+- 初始化提交说明。
 
-- 使用 GitHub 友好的英文小写短横线格式。
-- 空格转成 `-`。
-- 删除不适合仓库名的符号。
-- 中文项目名自动转成简短英文或拼音 slug。
-- 如果仓库名已存在，自动追加短后缀，例如 `-2` 或日期后缀。
+仓库名冲突时使用安全后缀并记录实际名称。不要切换未知账号或组织。
 
-## 默认账号规则
+## 执行前检查
 
-- 默认使用当前已登录的 GitHub 账号或当前可用的 GitHub 工具连接。
-- 不把“账号或组织”作为常规提问项。
-- 如果当前环境没有 GitHub 登录状态，或工具无法判断可用账号，提示用户先完成 GitHub 登录或连接。
-- 如果同一个账号下仓库名冲突，自动换名并记录实际仓库名。
-
-## 风险解释
-
-必须用新手能懂的话解释：
-
-- public 仓库：别人可能看到你的代码和文件。
-- private 仓库：外部默认看不到，但你仍然不能提交密钥、密码、token、session。
-- git remote：相当于给本地项目登记一个 GitHub 上传地址，之后 push 会默认发到这里。
-- commit：把当前改动打包成一个版本。
-- push：把这个版本上传到 GitHub。
-
-## 推荐流程
-
-```text
-PM 确认 PRD
--> 询问 public/private
--> 检查敏感文件
--> 自动生成仓库名
--> 创建 GitHub 仓库
--> 本地 git init 或检查已有 Git
--> 设置 git remote
--> commit
--> push
--> 在 HANDOFF.md 记录仓库地址和当前状态
-```
-
-## 禁止事项
-
-- 未确认 public/private，不创建仓库。
-- 未检查敏感文件，不 push。
-- 不把 API Key、密码、token、session、用户数据提交到 GitHub。
-- 不在用户不知情时切换远程仓库地址。
-- 不因为仓库名冲突就停下来问新手命名细节；应自动追加后缀并记录。
+- 解释 public/private、commit、remote、push 的含义和风险。
+- 检查 `git status`、现有 remote、`.gitignore`。
+- 搜索 `.env`、API Key、token、密码、session、证书和用户数据。
+- 说明将提交的文件范围。
+- 不覆盖不明 remote，不丢弃用户改动。
 
 ## 成功标志
 
-执行完成后说明：
-
 ```text
-GitHub 仓库地址
-仓库公开状态 public/private
-本地 remote 名称
-最新 commit hash
-push 是否成功
-HANDOFF.md 是否已记录
+GitHub 同步授权已记录
+public/private 已确认
+敏感文件检查已完成
+仓库地址、remote、commit hash、push 状态明确
+HANDOFF.md 已记录外部状态
 ```

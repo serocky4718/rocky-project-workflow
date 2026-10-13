@@ -1,180 +1,71 @@
-# Agent Workflow 角色协作规则
+# Agent Workflow
 
-用于创建或维护多人/多 Agent 协作项目。
+## 项目入口
 
-## 必备入口文件
+所有规模都使用：
 
-- `README.md`: 项目入口、快速开始、阅读顺序。
-- `AI_RULES.md`: Agent 行为规则、权限边界、安全要求。
-- `PRD.md`: 产品目标和总体范围。
-- `PRD_CURRENT.md`: 当前活跃版本和阶段状态。
-- `TASKS.md`: 当前迭代任务列表。
-- `HANDOFF.md`: 最新交接信息和下一步说明。
-- `PROJECT_STRUCTURE.md`: 文件地图和归属规则。
-- `ARCHITECTURE.md`: 当前架构和模块边界。
+- `README.md`：人类入口和快速开始。
+- `AGENTS.md`：Codex 自动读取的权威 Agent 规则。
+- `WORKFLOW.json`：规模、模式、角色、阶段和 PRD 确认记录；状态不构成授权。
+- `PRD.md`：产品目标和验收标准。
+- `TASKS.md`：当前版本任务。
+- `HANDOFF.md`：展示同一阶段，解释上一阶段结论和下一步；阶段本身以 WORKFLOW 为唯一来源。
 
-内容型项目可以额外添加：
+其他文件按 `project-scale-rules.md` 创建。需要跨平台说明时，可生成 `AI_RULES.md`，但只写明“权威规则见 AGENTS.md”和平台差异，不能复制一套会漂移的完整规则。
 
-- `STORY_RULES.md`: 故事、角色、世界观、文风规则。
-- `docs/story/`: 故事设定和内容资料。
-- `docs/content/`: 内容结构和内容规范。
+统一开工顺序和角色路由写入 `AGENTS.md` 的 Startup / Role Routing。README 只放使用说明及链接，不承载另一套“Agent 必须先读什么、何时切换角色”的规则。角色提示词只补充该职务的输入、职责和交付物。
 
-## 推荐阅读顺序
+## 执行模式
 
-新项目启动时，优先读：
+先读取 `execution-modes.md`。Guided Solo 是默认；Strict Handoff 和 Dispatcher 必须由用户明确选择。
 
-1. `SKILL.md`
-2. `references/pm-discovery-flow.md`
-3. `references/project-scale-rules.md`
-4. `references/output-file-templates.md`
-5. `references/role-delivery-rules.md`
-6. `references/role-prompts.md`
-7. `references/readme-role-entry.md`
+### Guided Solo
 
-项目文件已生成后，Agent 开工前优先读：
+- 同一任务可以依次执行多个阶段。
+- 在输出中标注当前阶段，保持 PM、Builder、QA 的判断边界。
+- 阶段之间不因形式上的角色切换停下来请求确认。
+- 遇到需求冲突、外部账号、付费、公开发布、高风险操作或重大范围变化时暂停。
 
-1. `README.md`
-2. `AI_RULES.md`
-3. `PRD_CURRENT.md`
-4. `TASKS.md`
-5. `HANDOFF.md`
-6. `PROJECT_STRUCTURE.md`
-7. `docs/reports/` 下对应角色报告
-8. `docs/agent-prompts/<role>.md`
+### Strict Handoff
 
-## 角色权限
+- 当前任务只执行声明的角色。
+- 完成后更新 `HANDOFF.md`，由用户决定何时开启下一窗口。
+- QA 和 Reviewer 不直接修改实现，除非用户明确切换到 Builder。
 
-Rocky 版默认规则：PM 负责产品和项目管理文档，包括 PRD、当前版本状态、任务、交接和变更记录。代码、配置、依赖安装、构建、部署、Git 写入不属于 PM 默认职责。
+### Dispatcher
 
-| 文件或目录 | 推荐负责人 |
+用户明确要求多 Agent 后，才调用协作工具：
+
+| 目的 | 当前 Codex 工具 |
 |---|---|
-| `PRD.md` | PM / Product Owner |
-| `PRD_CURRENT.md` | PM / Product Owner |
-| `TASKS.md` | PM |
-| `HANDOFF.md` | PM、Architect、Builder、QA 按阶段更新 |
-| `CHANGELOG.md` | PM，必要时由 Builder 补充技术变更 |
-| `docs/prd/<version>/` | PM / Product Owner |
-| `AI_RULES.md` | Architect / PM |
-| `ARCHITECTURE.md` | Architect |
-| `PROJECT_STRUCTURE.md` | Architect |
-| `docs/reports/architecture/` | Architect |
-| `src/`、`app/`、`pages/`、`components/`、`lib/`、`utils/` | Builder |
-| `tests/` | Builder / QA |
-| `docs/reports/implementation/` | Builder |
-| `docs/reports/qa/` | QA |
-| `docs/reports/review/` | Reviewer |
-| `docs/design/`、`docs/assets/` | Designer |
-| `docs/reports/design/` | Designer |
-| `.github/`、部署配置、git remote | DevOps / GitHub |
-| `docs/reports/devops/` | DevOps / GitHub |
+| 创建新子 Agent | `spawn_agent` |
+| 让已存在且空闲的 Agent 继续下一轮 | `followup_task` |
+| 给正在运行的 Agent 补充信息 | `send_message` |
+| 等待状态更新 | `wait_agent` |
+| 查看状态 | `list_agents` |
+| 中止当前工作 | `interrupt_agent` |
 
-## PM 交付规则
+`spawn_agent` 不能“继续”已有 Agent。当前环境没有 `send_input`。如果这些能力不可用，明确说明不能自动调度，不得假装已创建 Agent。
 
-PM 开始写入前，必须先和用户完成一轮探讨，确认：
+默认不使用 `create_thread`。只有用户明确要求独立、可见的 Codex 任务窗口时，才使用线程创建能力。
+
+Dispatcher 强制顺序：
 
 ```text
-目标
-范围
-优先级
-验收标准
-风险
-下一步
+Builder -> QA -> Reviewer
 ```
 
-确认后，PM 把结论写入：
+最多三轮。任何角色结论不清时，先要求该角色补充，不自行脑补通过。
 
-```text
-PRD.md
-PRD_CURRENT.md
-TASKS.md
-HANDOFF.md
-CHANGELOG.md
-docs/prd/<version>/
-```
+## 文档卫生
 
-PM 禁止：
+- `TASKS.md` 只保留当前活跃版本任务。
+- `BACKLOG.md` 只保留未来候选事项。
+- `HANDOFF.md` 只回答：当前阶段、上一阶段结论、下一步、绝对不能踩的坑。
+- 报告条件和目录统一维护在项目 AGENTS 的 Reporting；严格交接本身不要求报告。
+- 阶段变化按 `state-and-handoff.md` 同步 TASKS / HANDOFF 的 Stage，避免三个文件表达不同进度。
+- 版本收束时把旧快照移入 `docs/archive/<version>/`。
 
-- 修改代码。
-- 修改配置。
-- 安装依赖。
-- 启动开发服务器。
-- 运行构建或部署。
-- 运行 Git 写入类命令。
+## 新手说明
 
-PM 确定 PRD 后，可以触发 GitHub 自动建库流程。AI 创建仓库前只需要询问用户 public 还是 private；仓库名从项目名生成。
-
-## 角色提示词规则
-
-切换角色时，读取：
-
-```text
-README.md
-docs/agent-prompts/<role>.md
-HANDOFF.md
-TASKS.md
-PRD_CURRENT.md
-references/role-delivery-rules.md
-```
-
-每个角色必须遵守：
-
-- 只能在自己的默认可写范围内工作。
-- 需要越界时，先说明原因、风险和成功标志，再请求用户确认。
-- 完成后更新或建议更新 `HANDOFF.md`。
-- 新窗口优先从 `README.md` 的 Agent Role Entry 小节导航到当前职位 prompt。
-
-推荐跨窗口手动交接顺序：
-
-```text
-PM -> Architect -> Builder -> QA -> Reviewer -> DevOps/GitHub
-```
-
-这只是角色交接路线，不代表当前窗口要连续执行。每个角色完成后，只更新或建议更新 `HANDOFF.md`，等待用户决定是否开启下一角色。
-
-失败交接路线：
-
-```text
-QA 失败 -> Builder 修复 -> QA 再测
-需求不清 -> PM
-架构不清 -> Architect
-```
-
-## 报告规则
-
-不要在项目根目录随意新增报告文件。报告统一放到：
-
-```text
-docs/reports/architecture/
-docs/reports/implementation/
-docs/reports/qa/
-docs/reports/review/
-docs/reports/design/
-docs/reports/devops/
-```
-
-文件名推荐：
-
-```text
-YYYY-MM-DD_<scope>.md
-```
-
-`HANDOFF.md` 要短，只写：
-
-```text
-当前阶段
-已完成工作
-稳定基线
-下一位 Agent 指令
-当前禁止事项
-下一优先级
-```
-
-## 面向新手的说明方式
-
-每次准备执行修改或命令时，说明：
-
-- 我要做什么。
-- 为什么要这样做。
-- 会影响哪些文件或功能。
-- 风险是什么。
-- 成功标志是什么。
+把同一目的的低风险读取和检查命令合并说明。文件写入、依赖安装、Git 写入、外部账号、费用、公开发布和数据删除要分别说明实际风险及授权要求。

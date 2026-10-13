@@ -1,97 +1,92 @@
 ---
-name: project-create-rocky-0-1-0
-description: Rocky 版中文通用项目创建规则。用于新项目启动、PM 需求探讨、项目规模判断、PRD/TASKS/HANDOFF 等文件生成、README 角色入口、职位提示词、手动跨窗口交接、验证命令、回滚策略，以及 PRD 后 GitHub 自动建库。
+name: rocky-project-workflow
+description: Rocky 中文项目创建与角色协作工作流。仅在用户明确调用 $rocky-project-workflow，或明确要求 Rocky 工作流、PRD 多角色交接、严格 Builder/QA/Reviewer 分工或 Dispatcher 调度时使用。支持新手需求梳理、XS/S/M/L 规模判断、按规模生成项目文档、Codex AGENTS.md、验证与回滚规则，以及经用户明确授权后的 GitHub 建库与推送。
 ---
 
-# Project Create Rocky 0.1.0
+# Rocky Project Workflow
 
-这是一个“项目创建与角色协作”的路由型 skill。
+把本文件作为路由入口。只读取当前任务需要的 `references/`，不要一次加载全部规则。
 
-原则：`SKILL.md` 只做入口和路由，不重复展开详细规则。需要具体规则时，读取对应 `references/` 文件。
+## 默认原则
 
-## 启动方式
+- 默认使用 `Guided Solo`：同一任务内按 PM、Builder、QA 阶段持续推进，不因角色切换反复停下。
+- 仅在用户明确要求严格跨窗口交接时使用 `Strict Handoff`。
+- 仅在用户明确要求 Dispatcher、多 Agent 或 Builder/QA/Reviewer 子 Agent 时使用 `Dispatcher`。
+- 先确认 PRD，再按项目规模生成文件；不要给 XS/S 项目套完整文档体系。
+- 生成 Codex 原生 `AGENTS.md`。`AI_RULES.md` 仅在用户需要跨平台副本时生成，并指向 `AGENTS.md` 作为权威来源。
+- `README.md` 面向使用者，保存项目介绍、运行步骤和文档链接；统一开工顺序、角色路由、权限与交接规则放在 `AGENTS.md`，角色专属职责放在职位提示词中。
+- GitHub 是可选外部操作。先确认是否同步到 GitHub；用户同意后再确认 `public` 或 `private`。
+- 修改文件、运行命令或访问外部账号前，按风险等级批量说明，不为每条低风险读取命令重复打断用户。
 
-新项目推荐这样开始：
+## 推荐启动语
 
 ```text
-使用 $project-create-rocky-0-1-0 帮我创建一个新项目。
-先进入 PM 阶段，和我讨论需求，不要写代码。
-等 PRD 确认后，再生成项目文档和后续流程。
+使用 $rocky-project-workflow 帮我创建一个新项目。
+先进入 PM 阶段讨论需求，不要写代码；PRD 确认后再生成与项目规模匹配的文档。
 ```
-
-用户须知：
-
-- PM 阶段通常需要 2-5 轮对话，复杂项目会更多。
-- 你不需要提前准备文档，只需要先说清“想做什么”。
-- 完成后会得到一套可开工的项目文档、目录结构、角色入口和交接规则。
 
 ## 核心流程
 
 ```text
-启用 skill
+启用技能
 -> PM 需求探讨
--> 项目规模判断
--> PRD 确认
--> 生成 README / PRD / TASKS / HANDOFF / docs/agent-prompts
--> 手动进入 Architect / Builder / QA 等角色
--> PRD 后 GitHub 自动建库，只确认 public/private
+-> 判断 XS / S / M / L
+-> 推荐执行模式和交付规模
+-> 用户确认 PRD
+-> 预览将创建的文件
+-> 按规模生成项目文件
+-> 保存已确认需求、实现任务和确认来源
+-> 同步项目阶段与交接并检查就绪
+-> 按 Guided Solo / Strict Handoff / Dispatcher 推进
+-> 可选：用户明确授权后同步 GitHub
 ```
 
-角色交接是手动跨窗口交接，不在单窗口连续执行多个角色。除 GitHub 自动建库外，其他角色流程默认手动。
-
-## 触发式路由表
-
-按触发条件读取，不要一次性读完所有 references。
+## 路由表
 
 | 触发条件 | 读取文件 |
 |---|---|
-| 用户说“创建新项目” | `references/pm-discovery-flow.md` -> `references/project-scale-rules.md` -> `references/output-file-templates.md` |
-| PM 前 1-2 轮探讨 | `references/project-scale-rules.md` |
-| PM 确认 PRD 后 | `references/output-file-templates.md` -> `references/readme-role-entry.md` -> `references/github-automation-rules.md` |
-| 用户说“进入 PM” | `references/role-delivery-rules.md` -> `references/roles/pm.md` |
-| 用户说“进入 Architect” | `references/role-delivery-rules.md` -> `references/roles/architect.md` -> `references/validation-rules.md` |
-| 用户说“进入 Builder” | `references/role-delivery-rules.md` -> `references/roles/builder.md` |
-| 用户说“进入 QA” | `references/role-delivery-rules.md` -> `references/roles/qa.md` -> `references/validation-rules.md` |
-| 用户说“进入 Reviewer” | `references/role-delivery-rules.md` -> `references/roles/reviewer.md` |
-| 用户说“进入 Designer” | `references/role-delivery-rules.md` -> `references/roles/designer.md` -> `references/asset-and-data-rules.md` |
-| 用户说“进入 DevOps/GitHub” | `references/role-delivery-rules.md` -> `references/roles/devops-github.md` -> `references/github-automation-rules.md` |
-| 新窗口需要角色导航 | `references/readme-role-entry.md` -> `references/role-prompts.md` |
-| 修改文件或运行命令前 | `references/safety-rules.md` |
-| Builder 大改前或 QA 严重失败 | `references/rollback-rules.md` |
-| GitHub、写文件、验证、部署失败 | `references/failure-recovery-rules.md` |
-| 需要版本升级或兼容旧项目 | `references/versioning-strategy.md` |
-| 需要解释 `agents/openai.yaml` 或多平台 | `references/platform-adapter-rules.md` |
-| 需要来源、范围或迁移说明 | `references/source-map.md` |
+| 创建新项目、进入 PM | `references/roles/pm.md` -> `references/pm-discovery-flow.md` -> `references/project-scale-rules.md` -> `references/execution-modes.md` -> `references/output-file-templates.md` |
+| 用户询问 Builder 模型选择 | `references/builder-model-selection-rules.md` |
+| 选择执行模式 | `references/execution-modes.md` -> `references/agent-workflow.md` |
+| 进入某个角色 | `references/role-delivery-rules.md` -> 对应的 `references/roles/<role>.md` |
+| 启动 Dispatcher / 多 Agent | `references/execution-modes.md` -> `references/roles/dispatcher.md` -> `references/role-prompts.md` |
+| 生成项目骨架 | `references/project-scale-rules.md` -> `references/output-file-templates.md`；优先使用 `scripts/init_project.py` |
+| 记录 PRD 确认、更新阶段或交接 | `references/state-and-handoff.md`；优先使用 `scripts/update_workflow.py`，同步前预览，进入实现前做就绪检查 |
+| 检查或补齐职位提示词、角色入口 | `references/role-prompts.md` -> `references/readme-role-entry.md`；`scripts/sync_role_prompts.py` 只补齐缺失提示词，已有 README / AGENTS 入口按差异合并 |
+| 设计目录、资源或数据放置 | `references/project-structure.md` -> `references/asset-and-data-rules.md` |
+| 需要角色报告 | `references/report-templates.md` |
+| GitHub 建库或 push | `references/github-automation-rules.md` -> `references/safety-rules.md` |
+| 修改文件或运行命令 | `references/safety-rules.md` |
+| 验证或回滚 | `references/validation-rules.md` -> `references/rollback-rules.md` |
+| 失败恢复 | `references/failure-recovery-rules.md` |
+| 版本收束 | `references/version-closure-rules.md` |
+| 技能升级或旧项目迁移 | `references/versioning-strategy.md` |
+| 平台适配或规则来源 | `references/platform-adapter-rules.md` -> `references/source-map.md` |
 
-## 新项目最低输出
+## 规模化最低输出
 
-具体结构以 `references/output-file-templates.md` 为准。
+| 规模 | 最低输出 |
+|---|---|
+| XS | `README.md`、`AGENTS.md`、`PRD.md`、`TASKS.md`、`HANDOFF.md` |
+| S | XS + `BACKLOG.md` |
+| M | S + `PRD_CURRENT.md`、`PROJECT_STRUCTURE.md`、`ARCHITECTURE.md`、`CHANGELOG.md`、必要的 `docs/` |
+| L | M + 版本归档、必要报告目录；角色提示词按执行模式创建，设计、CI、部署目录按实际需求创建 |
 
-```text
-README.md
-AI_RULES.md
-PRD.md
-PRD_CURRENT.md
-TASKS.md
-HANDOFF.md
-PROJECT_STRUCTURE.md
-ARCHITECTURE.md
-CHANGELOG.md
-docs/prd/
-docs/agent-prompts/
-docs/reports/
-```
+严格交接或 Dispatcher 模式需要的角色提示词、报告目录，可以覆盖上述最低输出；只创建当前流程真正会使用的目录。
 
-## 新手说明要求
+生成脚本还会创建 `WORKFLOW.json` 记录规模、模式、角色、阶段和确认来源；初始骨架不表示 PRD 已确认或项目已可实现。
 
-执行修改文件、运行命令、访问外部账号、处理 GitHub 或凭据前，必须说明：
+## 新手说明
+
+在一组相关操作开始前，一次说明：
 
 ```text
 我要做什么
 为什么要这样做
 会改哪些文件或运行哪些命令
-有什么风险
+风险等级和具体风险
 成功标志是什么
+是否需要用户授权
 ```
 
-教程类内容必须写成开发新手可以照着做的步骤，并标注成功标志。
+低风险、只读、同一目的的命令可以合并说明。外部账号、费用、公开发布、push、部署和破坏性操作必须单独说明并取得所需授权。

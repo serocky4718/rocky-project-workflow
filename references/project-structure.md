@@ -1,129 +1,54 @@
-# Project Structure 项目结构规则
+# Project Structure Rules
 
-用于普通网站、应用、工具、内容项目或小型产品原型。
+目录必须反映真实项目，不为模板完整度创建空目录。
 
-## 根目录
+## 所有项目
 
 ```text
 README.md
-AI_RULES.md
+AGENTS.md
+WORKFLOW.json
 PRD.md
-PRD_CURRENT.md
 TASKS.md
 HANDOFF.md
-PROJECT_STRUCTURE.md
-ARCHITECTURE.md
-CHANGELOG.md
-package.json
 ```
 
-根据技术栈可能出现：
+其余根目录文件按规模规则创建。
+
+## 技术栈文件
+
+只创建或记录真实技术栈需要的文件：
 
 ```text
-src/
-app/
-pages/
-public/
-tests/
-tools/
-scripts/
-.github/
+Node / 前端    package.json、src/、app/、pages/、public/
+Python         pyproject.toml、src/ 或包目录、tests/
+Go             go.mod、cmd/、internal/
+Rust           Cargo.toml、src/
+静态站         HTML/CSS/JS 和资源目录
 ```
 
-## 文档目录
+不要把 `package.json` 当作所有项目的必备文件。
+
+## 文档
 
 ```text
-docs/
-  prd/
-  agent-prompts/
-  design/
-  reports/
-  assets/
+docs/prd/             M/L 版本化需求
+docs/archive/         L 或版本收束快照
+docs/agent-prompts/   Strict Handoff / Dispatcher
+docs/reports/         按 AGENTS 的 Reporting 和实际内容创建
+docs/design/          有设计交付时
+docs/assets/          有资源说明时
 ```
 
-规则：
+## 临时与正式资源
 
-- `docs/prd/` 放版本化需求文档。
-- `docs/agent-prompts/` 放项目内职位提示词，新窗口按角色只读取对应文件。
-- `docs/design/` 放设计说明、交互说明、参考资料。
-- `docs/reports/` 放 Agent 或人工工作报告。
-- `docs/assets/` 放资源说明，不默认放正式运行资源。
+- 候选和临时文件放项目约定的 `output/`、`tmp/` 或工作目录。
+- 只有用户确认的正式资源进入 `public/assets/` 等运行目录。
+- 私密数据不进入 `public/`，真实凭据不提交 Git。
 
-角色报告推荐拆成：
+## 文档卫生
 
-```text
-docs/reports/architecture/
-docs/reports/implementation/
-docs/reports/qa/
-docs/reports/review/
-docs/reports/design/
-docs/reports/devops/
-```
-
-对应关系：
-
-- Architect 写 `docs/reports/architecture/`。
-- Builder 写 `docs/reports/implementation/`。
-- QA 写 `docs/reports/qa/`。
-- Reviewer 写 `docs/reports/review/`。
-- Designer 写 `docs/reports/design/`。
-- DevOps/GitHub 写 `docs/reports/devops/`。
-
-## 源代码目录
-
-```text
-src/
-app/
-pages/
-components/
-lib/
-utils/
-```
-
-规则：
-
-- 源代码负责“项目如何运行”。
-- 不要把大量正文内容、故事内容、运营文案硬编码进运行逻辑。
-- 共享逻辑放到 `lib/` 或 `utils/`，避免复制粘贴到多个页面。
-- `.github/` 只放 GitHub Actions、Issue 模板、PR 模板等仓库配置文件，由 DevOps/GitHub 角色维护。
-
-## 草稿与输出
-
-```text
-drafts/
-output/
-tmp/
-```
-
-规则：
-
-- `drafts/` 放未确认草稿。
-- `output/` 放 AI 生成候选文件。
-- `tmp/` 放临时文件。
-- 这些目录里的内容默认不是正式交付物。
-
-## 正式资源
-
-```text
-public/assets/
-```
-
-规则：
-
-- 只有确认过的图片、音频、视频、图标等资源才放这里。
-- 正式页面不要引用 `output/` 里的临时资源。
-- 私密数据不要放到 `public/`。
-
-## 私密或运行数据
-
-```text
-storage/
-.env
-.env.local
-```
-
-规则：
-
-- 不提交真实 API Key、密码、session、用户数据。
-- `.env` 类文件通常要加入 `.gitignore`。
-- 如果不确定某个文件是否敏感，先问用户或默认不提交。
+- `TASKS.md` 只保存当前版本任务。
+- `BACKLOG.md` 保存未来候选。
+- `HANDOFF.md` 保存最短交接。
+- `PROJECT_STRUCTURE.md` 必须记录项目实际验证命令，而不是通用命令清单。
